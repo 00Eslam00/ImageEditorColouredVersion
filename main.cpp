@@ -17,6 +17,7 @@
 using namespace std;
 
 unsigned char image2 [SIZE][SIZE][RGB];
+unsigned char image3 [SIZE][SIZE][RGB];
 
 void loadRGBImage (){
 
@@ -41,6 +42,31 @@ else
 	cout << " try again: \n ";
 	loadRGBImage();
 }
+}
+
+void loadRGBImage2 (){
+
+    char imageFileName[100];
+    // Get coloured image file name
+    cout << "Enter Image Name to Process: ";
+    cin >> imageFileName;
+    // Add to it .bmp extension and load image
+    strcat (imageFileName, ".bmp");
+
+    // check if file exist or not
+    ifstream image_exist;
+    image_exist.open(imageFileName);
+
+    if (image_exist)
+    {
+       readRGBBMP(imageFileName, image3);
+    }
+    else
+    {
+        cout << "\n invalid name \n";
+        cout << " try again: \n ";
+        loadRGBImage();
+    }
 }
 
 void saveRGBImage (){
@@ -156,6 +182,126 @@ void detectImageEdges(){
     }
 }
 
+void mergeImages()
+{
+    loadRGBImage2 ();
+    for(int i = 0; i < SIZE; i++)
+    {
+        for(int j = 0; j < SIZE; j++)
+        {
+            for(int k = 0; k < 3; k++)
+            {
+                image2[i][j][k] = (image2[i][j][k] + image3[i][j][k])/2;
+            }
+        }
+    }
+}
+
+
+void darken_Lighten()
+{
+    string s;
+    cout << "To darken an image press d\nTo lighten an image press l\n";
+    cin >> s;
+    if (s == "d")
+    {
+        for(int i = 0; i < SIZE; i++)
+        {
+            for(int j = 0; j < SIZE; j++)
+            {
+                for(int k = 0; k < 3; k++)
+                {
+                    image2[i][j][k] *= 0.5;
+                }
+            }
+        }
+    }
+    else if (s == "l")
+    {
+        for(int i = 0; i < SIZE; i++)
+        {
+            for(int j = 0; j < SIZE; j++)
+            {
+                 for(int k = 0; k < 3; k++)
+                {
+                    if (image2[i][j][k] < 170)
+                    {
+                        image2[i][j][k] *= 1.5;
+                    }
+                    else
+                    {
+                        image2[i][j][k] = 255;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void shrink()
+{
+    for(int i = 0; i < SIZE; i++)
+    {
+        for(int j = 0; j < SIZE; j++)
+        {
+            for(int k = 0; k < 3; k++)
+            {
+                image3[i][j][k] = image2[i][j][k];
+            }
+        }
+    }
+    int index_i, index_j, value, new_size;
+    cout << "enter a shrink value : ";
+    cin >> value;
+    new_size = SIZE / value;
+    for(int i = 0; i < SIZE; i++)
+    {
+        for(int j = 0; j < SIZE; j++)
+        {
+            for(int k = 0; k < 3; k++)
+            {
+                if (i < new_size && j < new_size)
+                {
+                    image2[i][j][k] = image3[index_i][index_j][k];
+                }
+                else
+                {
+                    image2[i][j][k] = 255;
+                }
+
+            }
+            index_j += value;
+        }
+        index_j = 0;
+        index_i += value;
+    }
+}
+
+void blurImage()
+{
+    for(int i = 0; i < SIZE; i++)
+    {
+        for(int j = 0; j < SIZE; j++)
+        {
+            for(int k = 0; k < 3; k++)
+            {
+                image3[i + 1][j + 1][k] = image2[i][j][k];
+            }
+        }
+    }
+
+    for(int i = 0; i < SIZE; i++)
+    {
+        for(int j = 0; j < SIZE; j++)
+        {
+           for (int k = 0; k < 3; k++)
+           {
+                 image2[i][j][k] = (image3[i][j][k]+image3[i][j+1][k]+image3[i][j+2][k]+image3[i+1][j][k]+image3[i+1][j+2][k]+image3[i+2][j][k]+image3[i+2][j+1][k]+image3[i+2][j+2][k])/9;
+           }
+        }
+    }
+}
+
 int main()
 {
 
@@ -168,9 +314,13 @@ while (contin){
     cout<<"\n\n";
     cout<<"Enter The Number of the operation \n";
     cout<<"1- Black & White Filter \n";
+    cout<<"3- Merge Images \n";
     cout<<"4- Flip Image \n";
+    cout<<"6- Darken or Lighten Image \n";
     cout<<"7- Detect Image Edges \n";
+    cout<<"9- Shrink Image \n";
     cout<<"a- Mirror 1/2 Image \n";
+    cout<<"c- Blur Image \n";
     cout<<"s- Save the image to a file \n";
     cout<<"0- Exit \n\n";
     cout<<">>>> ";
@@ -179,7 +329,9 @@ while (contin){
 if (choice == "1"){
    ConvertBlackAndWhiteRGB();
 }
-
+else if (choice == "3"){
+   mergeImages();
+}
 else if(choice =="4"){
     cout<<"Flip (h)orizontally or (v)ertically ? \n";
     cin>>flipDetect;
@@ -192,11 +344,15 @@ else if(choice =="4"){
         flipImageVertically();
     }
 }
-
+else if (choice == "6"){
+   darken_Lighten();
+}
 else if(choice =="7"){
     detectImageEdges();
 }
-
+else if(choice =="9"){
+    shrink();
+}
 else if (choice == "a"){
     cout<<"Mirror (l)eft, (r)ight, (u)pper, (d)own side? \n";
     cin>>mirordetect;
@@ -216,6 +372,9 @@ else if (choice == "a"){
     else if(mirordetect == "r"){
         mirrorRight();
     }
+}
+else if(choice =="c"){
+    blurImage();
 }
 
 else if (choice == "s"){
