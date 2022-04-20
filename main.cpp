@@ -607,7 +607,8 @@ void shrink()
 			}
 		}
 	}
-	int index_i, index_j, value, new_size;
+	int index_i = 0, index_j = 0, value, new_size;
+	cin.ignore();
 	cout << "enter a shrink value : ";
 	cin >> value;
 	new_size = SIZE / value;
