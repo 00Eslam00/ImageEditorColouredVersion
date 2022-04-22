@@ -217,7 +217,7 @@ void rotate(){
 				swap(image2[i][j], image2[i][SIZE - j]);
 			}
 		}
-	
+
 }
 
 
@@ -517,6 +517,7 @@ void mirrorRight()
 
 void detectImageEdges()
 {
+    int arr1[SIZE][SIZE][RGB],arr2[SIZE][SIZE][RGB];
 	//convert black and white
 	ConvertBlackAndWhiteRGB();
 
@@ -529,16 +530,44 @@ void detectImageEdges()
 			{
 				if (image2[i][j][l] == image2[i][j + 1][l])
 				{
-					image2[i][j][l] = 255;
+					arr1[i][j][l] = 255;
 				}
 				else
 				{
-					image2[i][j][l] = 0;
+					arr1[i][j][l] = 0;
 				}
 			}
 		}
 	}
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
+		{
+			for (int l = 0; l < RGB; ++l)
+			{
+				if (image2[i+1][j][l] == image2[i][j][l])
+				{
+					arr2[i][j][l] = 255;
+				}
+				else
+				{
+					arr2[i][j][l] = 0;
+				}
+			}
+		}
+	}
+	for (int i = 0; i < SIZE; i++)
+	{
+        for (int j = 0; j < SIZE; j++)
+        {
+            for (int l = 0; l < RGB; ++l)
+            {
+            image2[i][j][l] = (arr1[i][j][l] & arr2[i][j][l]);
+            }
+        }
+    }
 }
+
 
 void mergeImages()
 {
